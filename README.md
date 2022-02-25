@@ -1,6 +1,6 @@
 # walkability_ml
 
-Method using machine learning to estimate walkability of streets.
+Method to estimate walkability of streets using machine learning (ML).
 
 ## Resources
 
