@@ -1,5 +1,7 @@
 # walkability_ml
 
+Method using machine learning to estimate walkability of streets.
+
 ## Resources
 
 - [https://elvinouyang.github.io/project/how-to-query-google-street-view-api-with-python/](https://elvinouyang.github.io/project/how-to-query-google-street-view-api-with-python/)
