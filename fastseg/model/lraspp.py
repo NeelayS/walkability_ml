@@ -11,8 +11,10 @@ import torch.nn.functional as F
 from .utils import get_trunk, ConvBnRelu
 from .base import BaseSegmentation
 
+
 class LRASPP(BaseSegmentation):
     """Lite R-ASPP style segmentation network."""
+
     def __init__(self, num_classes, trunk, use_aspp=False, num_filters=128):
         """Initialize a new segmentation model.
 
@@ -77,52 +79,53 @@ class LRASPP(BaseSegmentation):
     def forward(self, x):
         s2, s4, final = self.trunk(x)
         if self.use_aspp:
-            aspp = torch.cat([
-                self.aspp_conv1(final),
-                self.aspp_conv2(final),
-                self.aspp_conv3(final),
-                F.interpolate(self.aspp_pool(final), size=final.shape[2:]),
-            ], 1)
+            aspp = torch.cat(
+                [
+                    self.aspp_conv1(final),
+                    self.aspp_conv2(final),
+                    self.aspp_conv3(final),
+                    F.interpolate(self.aspp_pool(final), size=final.shape[2:]),
+                ],
+                1,
+            )
         else:
             aspp = self.aspp_conv1(final) * F.interpolate(
                 self.aspp_conv2(final),
                 final.shape[2:],
-                mode='bilinear',
-                align_corners=True
+                mode="bilinear",
+                align_corners=True,
             )
         y = self.conv_up1(aspp)
-        y = F.interpolate(y, size=s4.shape[2:], mode='bilinear', align_corners=False)
+        y = F.interpolate(y, size=s4.shape[2:], mode="bilinear", align_corners=False)
 
         y = torch.cat([y, self.convs4(s4)], 1)
         y = self.conv_up2(y)
-        y = F.interpolate(y, size=s2.shape[2:], mode='bilinear', align_corners=False)
+        y = F.interpolate(y, size=s2.shape[2:], mode="bilinear", align_corners=False)
 
         y = torch.cat([y, self.convs2(s2)], 1)
         y = self.conv_up3(y)
         y = self.last(y)
-        y = F.interpolate(y, size=x.shape[2:], mode='bilinear', align_corners=False)
+        y = F.interpolate(y, size=x.shape[2:], mode="bilinear", align_corners=False)
         return y
 
 
 class MobileV3Large(LRASPP):
     """MobileNetV3-Large segmentation network."""
-    model_name = 'mobilev3large-lraspp'
+
+    model_name = "mobilev3large-lraspp"
 
     def __init__(self, num_classes, **kwargs):
         super(MobileV3Large, self).__init__(
-            num_classes,
-            trunk='mobilenetv3_large',
-            **kwargs
+            num_classes, trunk="mobilenetv3_large", **kwargs
         )
 
 
 class MobileV3Small(LRASPP):
     """MobileNetV3-Small segmentation network."""
-    model_name = 'mobilev3small-lraspp'
+
+    model_name = "mobilev3small-lraspp"
 
     def __init__(self, num_classes, **kwargs):
         super(MobileV3Small, self).__init__(
-            num_classes,
-            trunk='mobilenetv3_small',
-            **kwargs
+            num_classes, trunk="mobilenetv3_small", **kwargs
         )

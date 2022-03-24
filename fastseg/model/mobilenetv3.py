@@ -6,11 +6,11 @@ import torch.nn as nn
 from geffnet import tf_mobilenetv3_large_100, tf_mobilenetv3_small_100
 from geffnet.efficientnet_builder import InvertedResidual, Conv2dSame, Conv2dSameExport
 
+
 class MobileNetV3_Large(nn.Module):
     def __init__(self, trunk=tf_mobilenetv3_large_100, pretrained=False):
         super(MobileNetV3_Large, self).__init__()
-        net = trunk(pretrained=pretrained,
-                    norm_layer=nn.BatchNorm2d)
+        net = trunk(pretrained=pretrained, norm_layer=nn.BatchNorm2d)
 
         self.early = nn.Sequential(net.conv_stem, net.bn1, net.act1)
 
@@ -32,7 +32,9 @@ class MobileNetV3_Large(nn.Module):
                     pad = 4
                 # Adjust padding if necessary, but NOT for "same" layers
                 assert m.kernel_size[0] == m.kernel_size[1]
-                if not isinstance(m, Conv2dSame) and not isinstance(m, Conv2dSameExport):
+                if not isinstance(m, Conv2dSame) and not isinstance(
+                    m, Conv2dSameExport
+                ):
                     pad *= (m.kernel_size[0] - 1) // 2
                     m.padding = (pad, pad)
 
@@ -45,12 +47,12 @@ class MobileNetV3_Large(nn.Module):
         self.block6 = net.blocks[6]
 
     def forward(self, x):
-        x = self.early(x) # 2x
+        x = self.early(x)  # 2x
         x = self.block0(x)
         s2 = x
-        x = self.block1(x) # 4x
+        x = self.block1(x)  # 4x
         s4 = x
-        x = self.block2(x) # 8x
+        x = self.block2(x)  # 8x
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)
@@ -61,8 +63,7 @@ class MobileNetV3_Large(nn.Module):
 class MobileNetV3_Small(nn.Module):
     def __init__(self, trunk=tf_mobilenetv3_small_100, pretrained=False):
         super(MobileNetV3_Small, self).__init__()
-        net = trunk(pretrained=pretrained,
-                    norm_layer=nn.BatchNorm2d)
+        net = trunk(pretrained=pretrained, norm_layer=nn.BatchNorm2d)
 
         self.early = nn.Sequential(net.conv_stem, net.bn1, net.act1)
 
@@ -84,7 +85,9 @@ class MobileNetV3_Small(nn.Module):
                     pad = 4
                 # Adjust padding if necessary, but NOT for "same" layers
                 assert m.kernel_size[0] == m.kernel_size[1]
-                if not isinstance(m, Conv2dSame) and not isinstance(m, Conv2dSameExport):
+                if not isinstance(m, Conv2dSame) and not isinstance(
+                    m, Conv2dSameExport
+                ):
                     pad *= (m.kernel_size[0] - 1) // 2
                     m.padding = (pad, pad)
 
@@ -96,11 +99,11 @@ class MobileNetV3_Small(nn.Module):
         self.block5 = net.blocks[5]
 
     def forward(self, x):
-        x = self.early(x) # 2x
+        x = self.early(x)  # 2x
         s2 = x
-        x = self.block0(x) # 4x
+        x = self.block0(x)  # 4x
         s4 = x
-        x = self.block1(x) # 8x
+        x = self.block1(x)  # 8x
         x = self.block2(x)
         x = self.block3(x)
         x = self.block4(x)
@@ -108,12 +111,12 @@ class MobileNetV3_Small(nn.Module):
         return s2, s4, x
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     model = MobileNetV3_Large(pretrained=True)
     input = torch.rand(1, 3, 512, 512)
     low, mid, x = model(input)
     print(model)
-    print(sum(p.numel() for p in model.parameters()), ' parameters')
+    print(sum(p.numel() for p in model.parameters()), " parameters")
     print(x.size())
     print(low.size())
     print(mid.size())

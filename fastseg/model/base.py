@@ -5,12 +5,28 @@ import torch.nn as nn
 from torchvision import transforms
 
 MODEL_WEIGHTS_URL = {
-    ('mobilev3large-lraspp', 256): 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f256-9b613ffd.pt',
-    ('mobilev3large-lraspp', 128): 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f128-9cbabfde.pt',
-    ('mobilev3small-lraspp', 256): 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f256-d853f901.pt',
-    ('mobilev3small-lraspp', 128): 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f128-a39a1e4b.pt',
-    ('mobilev3small-lraspp', 64): 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f64-114fc23b.pt',
+    (
+        "mobilev3large-lraspp",
+        256,
+    ): "https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f256-9b613ffd.pt",
+    (
+        "mobilev3large-lraspp",
+        128,
+    ): "https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f128-9cbabfde.pt",
+    (
+        "mobilev3small-lraspp",
+        256,
+    ): "https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f256-d853f901.pt",
+    (
+        "mobilev3small-lraspp",
+        128,
+    ): "https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f128-a39a1e4b.pt",
+    (
+        "mobilev3small-lraspp",
+        64,
+    ): "https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f64-114fc23b.pt",
 }
+
 
 class BaseSegmentation(nn.Module):
     """Module subclass providing useful convenience functions for inference."""
@@ -23,22 +39,26 @@ class BaseSegmentation(nn.Module):
             name = (cls.model_name, num_filters)
             if name in MODEL_WEIGHTS_URL:
                 weights_url = MODEL_WEIGHTS_URL[name]
-                print(f'Loading pretrained model {name[0]} with F={name[1]}...')
-                checkpoint = torch.hub.load_state_dict_from_url(weights_url, map_location='cpu')
+                print(f"Loading pretrained model {name[0]} with F={name[1]}...")
+                checkpoint = torch.hub.load_state_dict_from_url(
+                    weights_url, map_location="cpu"
+                )
             else:
-                raise ValueError(f'pretrained weights not found for model {name}, please specify a checkpoint')
+                raise ValueError(
+                    f"pretrained weights not found for model {name}, please specify a checkpoint"
+                )
         else:
-            checkpoint = torch.load(filename, map_location='cpu')
-        net = cls(checkpoint['num_classes'], num_filters=num_filters, **kwargs)
+            checkpoint = torch.load(filename, map_location="cpu")
+        net = cls(checkpoint["num_classes"], num_filters=num_filters, **kwargs)
         net.load_checkpoint(checkpoint)
         return net
 
     def load_checkpoint(self, checkpoint):
         """Load weights given a checkpoint object from training."""
         state_dict = {}
-        for k, v in checkpoint['state_dict'].items():
-            if k.startswith('module.'):
-                state_dict[k[len('module.'):]] = v
+        for k, v in checkpoint["state_dict"].items():
+            if k.startswith("module."):
+                state_dict[k[len("module.") :]] = v
         self.load_state_dict(state_dict)
 
     def predict_one(self, image, return_prob=False, device=None):
@@ -68,15 +88,17 @@ class BaseSegmentation(nn.Module):
         # Determine the device
         if device is None:
             if torch.cuda.is_available():
-                device = torch.device('cuda')
+                device = torch.device("cuda")
             else:
-                device = torch.device('cpu')
+                device = torch.device("cpu")
 
         # Preprocess images by normalizing and turning into `torch.tensor`s
-        tfms = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
+        tfms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+            ]
+        )
         ipt = torch.stack([tfms(im) for im in images]).to(device)
 
         # Run inference

@@ -5,19 +5,19 @@ import torch.nn as nn
 
 from geffnet import tf_efficientnet_b4, tf_efficientnet_b0
 
+
 class EfficientNet_B4(nn.Module):
-    def __init__(self, output_stride=8, BatchNorm=nn.BatchNorm2d,
-                 pretrained=False):
+    def __init__(self, output_stride=8, BatchNorm=nn.BatchNorm2d, pretrained=False):
         super(EfficientNet_B4, self).__init__()
-        net = tf_efficientnet_b4(pretrained=pretrained,
-                                 drop_rate=0.25,
-                                 drop_connect_rate=0.2,
-                                 norm_layer=BatchNorm)
+        net = tf_efficientnet_b4(
+            pretrained=pretrained,
+            drop_rate=0.25,
+            drop_connect_rate=0.2,
+            norm_layer=BatchNorm,
+        )
 
         self.output_stride = output_stride
-        self.early = nn.Sequential(net.conv_stem,
-                                   net.bn1,
-                                   net.act1)
+        self.early = nn.Sequential(net.conv_stem, net.bn1, net.act1)
         if self.output_stride == 8:
             block3_stride = 1
             block5_stride = 1
@@ -58,9 +58,7 @@ class EfficientNet_B4(nn.Module):
         self.block4 = net.blocks[4]
         self.block5 = net.blocks[5]
         self.block6 = net.blocks[6]
-        self.late = nn.Sequential(net.conv_head,
-                                  net.bn2,
-                                  net.act2)
+        self.late = nn.Sequential(net.conv_head, net.bn2, net.act2)
         del net
 
     def forward(self, x):
@@ -83,18 +81,17 @@ class EfficientNet_B4(nn.Module):
 
 
 class EfficientNet_B0(nn.Module):
-    def __init__(self, output_stride=8, BatchNorm=nn.BatchNorm2d,
-                 pretrained=False):
+    def __init__(self, output_stride=8, BatchNorm=nn.BatchNorm2d, pretrained=False):
         super(EfficientNet_B0, self).__init__()
-        net = tf_efficientnet_b0(pretrained=pretrained,
-                                 drop_rate=0.25,
-                                 drop_connect_rate=0.2,
-                                 norm_layer=BatchNorm)
+        net = tf_efficientnet_b0(
+            pretrained=pretrained,
+            drop_rate=0.25,
+            drop_connect_rate=0.2,
+            norm_layer=BatchNorm,
+        )
 
         self.output_stride = output_stride
-        self.early = nn.Sequential(net.conv_stem,
-                                   net.bn1,
-                                   net.act1)
+        self.early = nn.Sequential(net.conv_stem, net.bn1, net.act1)
         if self.output_stride == 8:
             block3_stride = 1
             block5_stride = 1
@@ -135,9 +132,7 @@ class EfficientNet_B0(nn.Module):
         self.block4 = net.blocks[4]
         self.block5 = net.blocks[5]
         self.block6 = net.blocks[6]
-        self.late = nn.Sequential(net.conv_head,
-                                  net.bn2,
-                                  net.act2)
+        self.late = nn.Sequential(net.conv_head, net.bn2, net.act2)
         del net
 
     def forward(self, x):
@@ -160,12 +155,11 @@ class EfficientNet_B0(nn.Module):
 
 
 if __name__ == "__main__":
-    model = EfficientNet_B0(BatchNorm=nn.BatchNorm2d, pretrained=True,
-                            output_stride=8)
+    model = EfficientNet_B0(BatchNorm=nn.BatchNorm2d, pretrained=True, output_stride=8)
     input = torch.rand(1, 3, 512, 512)
     low, mid, x = model(input)
     print(model)
-    print(sum(p.numel() for p in model.parameters()), ' parameters')
+    print(sum(p.numel() for p in model.parameters()), " parameters")
     print(x.size())
     print(low.size())
     print(mid.size())
