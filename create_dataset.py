@@ -32,7 +32,7 @@ class_names = [
 ]
 
 img_class_counts = {}
-img_dir = "../data/utube"
+img_dir = "../data/utube/cities"
 
 for img_path in sorted(os.listdir(img_dir)):
     print(f"Processing image {img_path}")
